@@ -1,0 +1,97 @@
+
+  createOrder:
+    name: taller-${self:provider.stage}-Orders-Create
+    handler: src/handlers/createOrder.createOrder
+    events:
+      - http:
+          method: post
+          path: /orders/create
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:provider.stage}-MainAuthorizerId
+
+  getOrder:
+      name: taller-${self:provider.stage}-Orders-Get
+      handler: src/handlers/getOrder.getOrder
+      events:
+        - http:
+            method: get
+            path: /orders/{id}
+            cors:
+              origin: '*'
+              headers:
+                - Content-Type
+                - Authorization
+                - X-Api-Key
+                - X-Amz-Date
+                - X-Amz-Security-Token
+            authorizer:
+              type: CUSTOM
+              authorizerId: !ImportValue ${self:provider.stage}-MainAuthorizerId 
+
+  listOrdersByUserId:
+      name: taller-${self:provider.stage}-Orders-ListOrdersByUserId
+      handler: src/handlers/listOrdersByUserId.listOrdersByUserId
+      events:
+        - http:
+            method: get
+            path: /orders/list/users/{userId}
+            cors:
+              origin: '*'
+              headers:
+                - Content-Type
+                - Authorization
+                - X-Api-Key
+                - X-Amz-Date
+                - X-Amz-Security-Token
+            authorizer:
+              type: CUSTOM
+              authorizerId: !ImportValue ${self:provider.stage}-MainAuthorizerId 
+
+  cancelOrder:
+      name: taller-${self:provider.stage}-Orders-Cancel
+      handler: src/handlers/cancelOrder.cancelOrder
+      events:
+        - http:
+            method: post
+            path: /orders/{id}/cancel
+            cors:
+              origin: '*'
+              headers:
+                - Content-Type
+                - Authorization
+                - X-Api-Key
+                - X-Amz-Date
+                - X-Amz-Security-Token
+            authorizer:
+              type: CUSTOM
+              authorizerId: !ImportValue ${self:provider.stage}-MainAuthorizerId  
+
+
+  confirmOrder:
+      name: taller-${self:provider.stage}-Orders-Confirm
+      handler: src/handlers/confirmOrder.confirmOrder
+      events:
+        - http:
+            method: post
+            path: /orders/{id}/confirm
+            cors:
+              origin: '*'
+              headers:
+                - Content-Type
+                - Authorization
+                - X-Api-Key
+                - X-Amz-Date
+                - X-Amz-Security-Token
+            authorizer:
+              type: CUSTOM
+              authorizerId: !ImportValue ${self:provider.stage}-MainAuthorizerId 
+

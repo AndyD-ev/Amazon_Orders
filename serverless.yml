@@ -1,0 +1,76 @@
+service: taller-orders
+frameworkVersion: "4"
+
+plugins:
+  - serverless-localstack
+
+
+custom:
+  localstack:
+    stages: [local]
+    host: http://localhost
+    edgePort: 4566
+    autoStart: false
+
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  stage: ${opt:stage, 'local'}
+  region: us-east-1
+  environment:
+    STAGE: ${self:provider.stage}
+    CORS_ORIGINS: ${file(./config/config-${self:provider.stage}.json):CORS_ORIGINS}
+    ORDERS_TABLE: !Ref OrdersTable
+  apiGateway:
+    restApiId: !ImportValue ${self:provider.stage}-MainRestApiId
+    restApiRootResourceId: !ImportValue ${self:provider.stage}-MainRestApiRootResourceId
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource:
+        - !GetAtt OrdersTable.Arn
+        - !Sub "${OrdersTable.Arn}/index/*"
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource:
+        - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:taller-${self:provider.stage}-Products-*"
+
+functions:
+  - ${file(./sls/sls.functions.yml)}
+
+resources:
+  Resources:
+    OrdersTable:
+      Type: AWS::DynamoDB::Table
+      Properties: 
+        TableName: ${self:service}-${self:provider.stage}-orders
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: orderId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: orderId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UserOrdersIndex
+            KeySchema: 
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
