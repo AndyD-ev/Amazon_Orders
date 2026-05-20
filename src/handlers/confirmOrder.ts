@@ -65,9 +65,8 @@ async function confirmOrderHandler(event: APIGatewayProxyEvent): Promise<APIGate
 
         return ok({ message: "Orden confirmada." })
     } catch (error) {
-        console.error("Error en confirmOrder: ", error);
+        console.error("Error en getOrder: ", error);
         return internalError()
     }
 }
-
 export const confirmOrder = withCors(confirmOrderHandler);

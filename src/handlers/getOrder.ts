@@ -7,7 +7,6 @@ import { withCors } from "../common/cors";
 
 const ORDERS_TABLE = process.env.ORDERS_TABLE!;
 
-
 async function getOrderHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
     try {
         const orderId = event.pathParameters?.id;
@@ -41,3 +40,12 @@ async function getOrderHandler(event: APIGatewayProxyEvent): Promise<APIGatewayP
 }
 
 export const getOrder = withCors(getOrderHandler);
+
+
+
+
+
+
+
+
+

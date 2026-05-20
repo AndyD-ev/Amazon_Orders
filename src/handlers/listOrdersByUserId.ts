@@ -8,7 +8,8 @@ import { withCors } from "../common/cors";
 const ORDERS_TABLE = process.env.ORDERS_TABLE!;
 
 
-async function listOrdersBySellerHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+//async function listOrdersByUserId(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+async function listOrdersByUserIdHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
     try {
         const userId = event.pathParameters?.userId;
         const callerId = event.requestContext.authorizer?.userId as string;
@@ -29,9 +30,10 @@ async function listOrdersBySellerHandler(event: APIGatewayProxyEvent): Promise<A
         )
         return ok({ order: result.Items ?? [] })
     } catch (error) {
-        console.error("Error en listOrdersByUserId: ", error);
+        console.error("Error en getOrder: ", error);
         return internalError()
     }
 }
 
-export const listOrdersBySeller = withCors(listOrdersBySellerHandler);
+//export const listOrdersBySeller = withCors(listOrdersBySellerHandler);
+export const listOrdersByUserId = withCors(listOrdersByUserIdHandler);

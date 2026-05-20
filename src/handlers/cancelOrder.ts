@@ -30,38 +30,38 @@ async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
         const order = existing.Item as Order;
 
         // Validar que solo se puedan confirmar ordenes en estado de pending
-        if (order.status !== "pending"){ 
+        if (order.status !== "pending") {
             return badRequest(`No se puede cancelar una orden con el status ${order.status}`);
         }
 
         const isBuyer = order.userId === callerId;
 
-        if(!isBuyer){
-            // Solo un vendedor con productos en la orden puede confirmarla
-            const res = await invokeLambda<{ products: Array<{ productId: string }> }> (
+        if (!isBuyer) {
+            // Solo un vendedor con productos en la orden puede cancelarla
+            const res = await invokeLambda<{ products: Array<{ productId: string }> }>(
                 productFn("ListProductsBySeller"),
                 { pathParameters: { sellerId: callerId } }
             );
 
-                const sellerProductIds = new Set(
-                    res.statusCode === 200 ? res.body.products.map((p) => p.productId) : []
-                );
+            const sellerProductIds = new Set(
+                res.statusCode === 200 ? res.body.products.map((p) => p.productId) : []
+            );
 
-                const isSeller = order.items.some((i) => sellerProductIds.has(i.productId));
+            const isSeller = order.items.some((i) => sellerProductIds.has(i.productId));
 
-                if(!isSeller){
-                    return forbidden("Solo puedes cancelar ordenes que tu hiciste u ordenes que contengan productos que tú vendes.")
-                }
+            if(!isSeller){
+                return forbidden("Solo puedes cancelar ordenes que tu hiciste u ordenes que contengan productos que tu vendes.")
+            }
         }
 
 
         await dynamo.send(
             new UpdateCommand({
-                TableName:ORDERS_TABLE,
+                TableName: ORDERS_TABLE,
                 Key: { orderId },
                 UpdateExpression: "SET #status = :status, updatedAt = :updatedAt",
-                ExpressionAttributeNames: { "#status" : "status" },
-                ExpressionAttributeValues :{
+                ExpressionAttributeNames: { "#status": "status" },
+                ExpressionAttributeValues: {
                     ":status": "cancelled",
                     ":updatedAt": new Date().toISOString()
                 }
@@ -70,9 +70,9 @@ async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResu
 
         return ok({ message: "Orden cancelada." })
     } catch (error) {
-        console.error("Error en cancelOrder: ", error);
+        console.error("Error en getOrder: ", error);
         return internalError()
     }
-} 
+}
 
 export const cancelOrder = withCors(handler);
